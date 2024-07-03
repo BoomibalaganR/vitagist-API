@@ -1,0 +1,97 @@
+http:
+  port: 8080 
+  cors:
+    origin: '*'
+    methods: 'GET, POST, PUT, DELETE'
+
+apiEndpoints:
+  login:
+    paths: '/api/v1/consumers/login'
+  register:
+    paths: '/api/v1/consumers/register'
+  consumers:
+    host: '*'
+    paths: '/api/v1/consumers/*' 
+  documents:
+    host: '*'
+    paths: '/api/v1/documents/*'
+
+serviceEndpoints:
+  consumerService:
+    url: 'http://127.0.0.1:3001' 
+  documentService:
+    url: 'http://127.0.0.1:3002'
+
+policies:
+  - jwt
+  - log
+  - cors
+  - proxy  
+  - request-transformer 
+  - expression
+
+pipelines:
+  loginPipeline:
+    apiEndpoints:
+      - login
+    policies: 
+      - log:
+          action:
+            message: 'login request proxy to consumer service ' 
+      - proxy:
+          action:
+            serviceEndpoint: consumerService
+
+  registerPipeline:
+    apiEndpoints:
+      - register
+    policies:
+      - log:
+          action:
+            message: 'register request proxy to consumer service'
+      - proxy:
+          action:
+            serviceEndpoint: consumerService
+
+  consumerPipeline:
+    apiEndpoints:
+      - consumers
+    policies:  
+      - jwt:
+          action:
+            secretOrPublicKey: "jztvje%)vvmumv@tca+%=am43#53+!rutiew9gnc_4j)z807&_" 
+            checkCredentialExistence: false
+            jwtAlgorithms: ['HS256']    
+          
+      # - request-transformer:
+      #     action:
+      #       headers:
+      #         add:
+      #           x-coffer-id: req.user.coffer_id
+      - log: 
+          action:
+            message: 'JWT token decoded: ${JSON.stringify(req.user)}'
+      - proxy:
+          action:
+            serviceEndpoint: consumerService 
+            changeOrigin: true  
+
+  documentPipeline:
+    apiEndpoints:
+      - documents
+    policies: 
+     
+      # - jwt:
+      #     action:
+      #       secretOrPublicKey: "jztvje%)vvmumv@tca+%=am43#53+!rutiew9gnc_4j)z807&_" 
+      #       checkCredentialExistence: false
+      #       jwtAlgorithms: ['HS256']    
+          
+      # - log: 
+      #     action:
+      #       message: 'JWT token decoded: ${JSON.stringify(req.user)}'
+      - proxy:
+          action:
+            serviceEndpoint: documentService 
+            changeOrigin: true 
+     
