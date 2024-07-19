@@ -1,6 +1,6 @@
 /**
  * Module exports for citizenship service.
- * This module exports the citizenshipService which provides methods, 
+ * This module exports the citizenshipService which provides methods,
  * to interact with citizenship data.
  */
 exports.citizenshipService = require('./citizenshipService')
@@ -16,3 +16,9 @@ exports.authService = require('./authService')
  * This module exports the userService which provides methods to interact with user data.
  */
 exports.userService = require('./userService')
+
+/**
+ * Module exports for relationship service.
+ * This module exports the relationshipService which provides methods to interact with relationship data.
+ */
+exports.relationshipService = require('./relationshipService')

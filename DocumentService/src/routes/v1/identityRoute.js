@@ -32,7 +32,7 @@ router.route('/:cat')
 /**
  * Route to handle operations for a specific identity document under a category and document type.
  */
-router.route('/:cat/:doc_type')
+router.route('/:cat/:doctype')
   .get(identityDocumentController.getIdentityDocumentByDocType) // Get an identity document by document type
   .put(
     validate(identityDocsValidation.updateIdentitydocs), // Validate the request body

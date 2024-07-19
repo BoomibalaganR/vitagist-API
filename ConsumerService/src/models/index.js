@@ -9,3 +9,9 @@ exports.Consumer = require('./consumer')
  * Represents a country in the database.
  */
 exports.Country = require('./country')
+
+/**
+ * Exporting the consumerRelationship model.
+ * Represents a consumerRelationship in the database.
+ */
+exports.ConsumerRelationship = require('./consumerRelationship')

@@ -9,3 +9,9 @@ exports.authController = require('./authController')
  * This module exports the citizenshipController which handles citizenship related operations.
  */
 exports.citizenshipController = require('./citizenshipController')
+
+/**
+ * Module exports for relationship controller.
+ * This module exports the relationship Controller which handles relationship related operations.
+ */
+exports.relationshipController = require('./relationshipController')

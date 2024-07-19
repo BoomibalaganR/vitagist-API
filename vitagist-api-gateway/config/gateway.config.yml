@@ -1,6 +1,6 @@
 http:
-  port: 8080 
-  cors:
+  port: ${X_ZOHO_CATALYST_LISTEN_PORT} 
+  cors: 
     origin: '*'
     methods: 'GET, POST, PUT, DELETE'
 
@@ -18,9 +18,9 @@ apiEndpoints:
 
 serviceEndpoints:
   consumerService:
-    url: 'http://127.0.0.1:3001' 
+    url: ${CONSUMER_SERVICE_URL} 
   documentService:
-    url: 'http://127.0.0.1:3002'
+    url:  ${DOCUMENT_SERVICE_URL}
 
 policies:
   - jwt
@@ -35,31 +35,45 @@ pipelines:
     apiEndpoints:
       - login
     policies: 
-      - log:
+      - cors:
           action:
-            message: 'login request proxy to consumer service ' 
+            origin: '*'
+            methods: 'GET, POST, PUT, DELETE' 
       - proxy:
           action:
             serviceEndpoint: consumerService
+            changeOrigin: true  
+      - log:
+          action:
+            message: 'login request proxy to consumer service '
 
   registerPipeline:
     apiEndpoints:
       - register
-    policies:
+    policies: 
+      - cors:
+          action:
+            origin: '*'
+            methods: 'GET, POST, PUT, DELETE'
       - log:
           action:
             message: 'register request proxy to consumer service'
       - proxy:
           action:
             serviceEndpoint: consumerService
+            changeOrigin: true 
 
   consumerPipeline:
     apiEndpoints:
       - consumers
-    policies:  
+    policies:   
+      - cors:
+          action:
+            origin: '*'
+            methods: 'GET, POST, PUT, DELETE'
       - jwt:
           action:
-            secretOrPublicKey: "jztvje%)vvmumv@tca+%=am43#53+!rutiew9gnc_4j)z807&_" 
+            secretOrPublicKey: ${JWT_SECRET}
             checkCredentialExistence: false
             jwtAlgorithms: ['HS256']    
           
@@ -70,20 +84,27 @@ pipelines:
       #           x-coffer-id: req.user.coffer_id
       - log: 
           action:
-            message: 'JWT token decoded: ${JSON.stringify(req.user)}'
+            message: 'successfully authenticated'
       - proxy:
           action:
             serviceEndpoint: consumerService 
-            changeOrigin: true  
+            changeOrigin: true   
+      - log:
+          action:
+            message: 'consumer request proxy to consumer service ' 
 
   documentPipeline:
     apiEndpoints:
       - documents
-    policies: 
+    policies:  
+      - cors:
+          action:
+            origin: '*'
+            methods: 'GET, POST, PUT, DELETE'
      
       # - jwt:
       #     action:
-      #       secretOrPublicKey: "jztvje%)vvmumv@tca+%=am43#53+!rutiew9gnc_4j)z807&_" 
+      #       secretOrPublicKey:  ${JWT_SECRET}
       #       checkCredentialExistence: false
       #       jwtAlgorithms: ['HS256']    
           
@@ -93,5 +114,7 @@ pipelines:
       - proxy:
           action:
             serviceEndpoint: documentService 
-            changeOrigin: true 
-     
+            changeOrigin: true  
+      - log:
+          action:
+            message: 'document request proxy to document service ' 

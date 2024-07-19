@@ -22,15 +22,22 @@ const COUNTRIES_IDOC_VALIDATE = {
 } 
 
 
-exports.validateIdProof = (country, doctype, docid) => {
+exports.validateIdProof = (country, doctype, docid) => { 
+    console.log(country, doctype, docid)
     if (COUNTRIES_IDOC_MAP[country] && COUNTRIES_IDOC_MAP[country][doctype]) {
         const pattern = COUNTRIES_IDOC_VALIDATE[country][doctype] 
-        // return pattern ? pattern.test(docid): true
-        if (pattern) {
-            return pattern.test(docid)
-        }else{
-            return true
-        }
+        return pattern ? pattern.test(docid): true
+    }else{
+        console.log('given doctype is not there in our country')
     } 
     return false
+} 
+
+exports.validateDocType = (country, doctype) => { 
+    console.log(country, doctype)
+    const countryDocTypes = COUNTRIES_IDOC_MAP[country]
+
+    // Check if COUNTRIES_IDOC_MAP has the country and 
+    //if doctype exists for that country
+    return countryDocTypes && countryDocTypes.hasOwnProperty(doctype)
 }

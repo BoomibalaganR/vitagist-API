@@ -13,39 +13,42 @@ const inflate = util.promisify(zlib.inflate)
 const CACHE_EXPIRE = config.cache.expire
 
 exports.cacheMiddleware = async (req, res, next) => {
-    const key = `cache:${req.method}:${req.originalUrl}`
+    const key = `cache:${req.method}:${req.originalUrl}:${req.user.coffer_id}`
     console.log('Generated key:', key)
+	// console.log(redisClient.isOpen)
+    if(redisClient.isOpen){
+		try { 
+			const cachedData = await redisClient.get(key)
 
-    try {
-        const cachedData = await redisClient.get(key)
+			if (cachedData) {
+				console.log('Cache hit:', key)
 
-        if (cachedData) {
-            console.log('Cache hit:', key)
+				const decompressedData = await inflate(Buffer.from(cachedData, 'base64'))
+				const jsonString = decompressedData.toString()
+				const parsedData = JSON.parse(jsonString)
 
-            const decompressedData = await inflate(Buffer.from(cachedData, 'base64'))
-            const jsonString = decompressedData.toString()
-            const parsedData = JSON.parse(jsonString)
+				return res.json(parsedData)
+			}
 
-            return res.json(parsedData)
-        }
+			console.log('Cache miss:', key)
 
-        console.log('Cache miss:', key)
+			// Override res.send for caching the response
+			res.jsonResponse = res.send
+			res.send = async (data) => {
+				const compressedData = await deflate(data)
+				await redisClient.setEx(key, CACHE_EXPIRE, compressedData.toString('base64'))
 
-        // Override res.send for caching the response
-        res.jsonResponse = res.send
-        res.send = async (data) => {
-            const compressedData = await deflate(data)
-            await redisClient.setEx(key, CACHE_EXPIRE, compressedData.toString('base64'))
-
-            res.jsonResponse(data);
-        }
-
-        next()
-    } catch (error) {
-        logger.info(`Error accessing Redis: ${error}`)
-        // Proceed without caching if something wrong on redis server
-        next()
-    }
+				res.jsonResponse(data);
+			}
+			
+			// next()
+		} catch (error) {
+			logger.info(`Error accessing Redis: ${error}`)
+			// Proceed without caching if something wrong on redis server
+			// next()
+		} 
+    } 
+    next()
 }
 
 

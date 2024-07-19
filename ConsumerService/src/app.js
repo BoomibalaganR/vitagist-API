@@ -12,7 +12,7 @@ const app = express()
 
 // Enable CORS with specific options
 const corsOptions = {
-    origin: 'https://editor.swagger.io'
+    origin: '*'
 }
 app.use(cors(corsOptions))
 
